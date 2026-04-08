@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudioFlow — Client Portal for Design Studios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #040811;
+  --bg2:     #080d1c;
+  --bg3:     #0c1427;
+  --border:  #1a2540;
+  --text:    #e8edf8;
+  --muted:   #6478a0;
+  --accent:  #4f7cff;
+  --accent2: #7c5cfc;
+  --green:   #22c55e;
+  --orange:  #f97316;
+  --yellow:  #fbbf24;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background mesh */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,124,255,.07) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(124,92,252,.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Nav ──────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 40px;
+  background: rgba(4,8,17,.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+  text-decoration: none; color: var(--text);
+}
+.nav-logo-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 8px; }
+.nav-link {
+  padding: 8px 16px; border-radius: 8px; text-decoration: none;
+  font-size: 14px; font-weight: 500; color: var(--muted);
+  transition: color .15s;
+}
+.nav-link:hover { color: var(--text); }
+.nav-cta {
+  padding: 9px 20px; border-radius: 8px;
+  background: var(--accent); color: #fff;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none; transition: background .15s;
+}
+.nav-cta:hover { background: #3d6ae8; }
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+.hero {
+  position: relative; z-index: 1;
+  padding: 100px 40px 80px;
+  text-align: center; max-width: 900px; margin: 0 auto;
+}
+.early-bird-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 30px;
+  background: rgba(249,115,22,.1);
+  border: 1px solid rgba(249,115,22,.25);
+  font-size: 13px; font-weight: 600; color: var(--orange);
+  margin-bottom: 28px;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:.75 } }
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #fff 40%, rgba(79,124,255,.8) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 24px;
+}
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--muted); line-height: 1.7;
+  max-width: 600px; margin: 0 auto 40px;
+  font-weight: 400;
+}
+.hero-ctas { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.btn-hero-primary {
+  padding: 14px 32px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 16px; font-weight: 700;
+  text-decoration: none; transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 0 40px rgba(79,124,255,.25);
+  font-family: inherit;
+}
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 50px rgba(79,124,255,.35); }
+.btn-hero-ghost {
+  padding: 14px 32px; border-radius: 10px;
+  border: 1px solid var(--border); color: var(--text);
+  font-size: 16px; font-weight: 600; text-decoration: none;
+  transition: border-color .15s; font-family: inherit;
+}
+.btn-hero-ghost:hover { border-color: var(--muted); }
+
+/* ── Section ─────────────────────────────────────────────────── */
+section { position: relative; z-index: 1; padding: 80px 40px; }
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 3vw, 42px);
+  font-weight: 800; line-height: 1.2;
+  letter-spacing: -.8px; margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 16px; color: var(--muted); max-width: 540px; line-height: 1.7;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* ── Features ────────────────────────────────────────────────── */
+.features-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px; margin-top: 52px;
+}
+.feature-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px;
+  transition: border-color .2s, transform .2s;
+}
+.feature-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.feature-icon { font-size: 28px; margin-bottom: 16px; }
+.feature-title { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 17px; margin-bottom: 8px; }
+.feature-desc  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ── Pricing ─────────────────────────────────────────────────── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 20px; margin-top: 52px;
+}
+.plan-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px; position: relative;
+  transition: transform .2s;
+}
+.plan-card:hover { transform: translateY(-4px); }
+.plan-card.featured {
+  background: linear-gradient(145deg, rgba(79,124,255,.08), rgba(124,92,252,.05));
+  border-color: rgba(79,124,255,.3);
+}
+.plan-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; white-space: nowrap;
+}
+.plan-name  { font-family: 'Syne',sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.plan-tag   { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.plan-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.plan-price {
+  font-family: 'Syne',sans-serif; font-size: 40px; font-weight: 800;
+  color: var(--text);
+}
+.plan-price-old { font-size: 18px; color: var(--muted); text-decoration: line-through; }
+.plan-period { font-size: 14px; color: var(--muted); }
+.plan-lock {
+  font-size: 12px; color: var(--orange); font-weight: 600;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 5px;
+}
+.plan-divider { height: 1px; background: var(--border); margin: 20px 0; }
+.plan-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.5;
+}
+.plan-feature .check { color: var(--green); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.plan-feature .cross { color: #2a3855; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.plan-feature.included { color: var(--text); }
+.plan-cta {
+  display: block; width: 100%; padding: 12px; text-align: center;
+  border-radius: 10px; font-size: 14px; font-weight: 700;
+  text-decoration: none; cursor: pointer; border: none; font-family: inherit;
+  transition: all .15s; margin-top: 24px;
+}
+.plan-cta-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; box-shadow: 0 0 30px rgba(79,124,255,.2);
+}
+.plan-cta-primary:hover { box-shadow: 0 0 40px rgba(79,124,255,.35); transform: translateY(-1px); }
+.plan-cta-ghost {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+.plan-cta-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Slots counter */
+.slots-bar { margin-bottom: 16px; }
+.slots-text { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+.slots-track {
+  height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+}
+.slots-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow));
+  transition: width .5s;
+}
+
+/* ── How it works ────────────────────────────────────────────── */
+.steps { display: flex; gap: 40px; margin-top: 52px; flex-wrap: wrap; }
+.step { flex: 1; min-width: 200px; }
+.step-num {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(79,124,255,.12); border: 1px solid rgba(79,124,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne',sans-serif; font-weight: 800; font-size: 18px;
+  color: var(--accent); margin-bottom: 16px;
+}
+.step-title { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 17px; margin-bottom: 8px; }
+.step-desc  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ── Signup form ─────────────────────────────────────────────── */
+#signup {
+  background: linear-gradient(145deg, rgba(79,124,255,.05), rgba(124,92,252,.03));
+}
+.signup-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 48px; max-width: 560px; margin: 52px auto 0;
+}
+.signup-box h2 {
+  font-family: 'Syne',sans-serif; font-weight: 800; font-size: 26px;
+  margin-bottom: 6px;
+}
+.signup-box p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-size: 11px; font-weight: 700;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .6px;
+  margin-bottom: 6px;
+}
+.form-group input, .form-group select {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 9px; color: var(--text);
+  font-family: inherit; font-size: 14px; outline: none;
+  transition: border .15s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+.form-group input::placeholder { color: var(--muted); }
+.btn-signup {
+  width: 100%; padding: 14px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 16px; font-weight: 700;
+  border: none; cursor: pointer; font-family: inherit;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 0 30px rgba(79,124,255,.2);
+  margin-top: 8px;
+}
+.btn-signup:hover { transform: translateY(-2px); box-shadow: 0 4px 40px rgba(79,124,255,.3); }
+.btn-signup:disabled { opacity: .6; cursor: default; transform: none; }
+.signup-note { text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+/* Success */
+.success-box {
+  background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
+  border-radius: 14px; padding: 32px; text-align: center; max-width: 560px; margin: 52px auto 0;
+}
+.success-icon { font-size: 48px; margin-bottom: 16px; }
+.success-box h3 { font-family: 'Syne',sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--green); }
+.success-box p  { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.success-cred   { background: var(--bg2); border-radius: 10px; padding: 20px; margin: 20px 0; text-align: left; }
+.cred-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.cred-row:last-child { border-bottom: none; }
+.cred-label { color: var(--muted); }
+.cred-val   { font-weight: 600; }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+footer {
+  position: relative; z-index: 1;
+  text-align: center; padding: 40px;
+  border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--muted);
+}
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+@media (max-width: 640px) {
+  nav { padding: 14px 20px; }
+  .hero { padding: 60px 20px 60px; }
+  section { padding: 60px 20px; }
+  .form-row { grid-template-columns: 1fr; }
+  .signup-box { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">⬡</div>
+    StudioFlow
+  </a>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+    <a href="#signup" class="nav-cta">Start Free →</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<div class="hero" id="home">
+  <div class="early-bird-pill" id="heroPill">
+    🔥 Early Bird — Lock $29/month forever (going to $59 soon)
+  </div>
+  <h1>Client Portal for<br>Design Studios</h1>
+  <p class="hero-sub">
+    Give your clients a branded portal to track orders, download files,
+    and message your team. You stay in control.
+  </p>
+  <div class="hero-ctas">
+    <a href="#signup" class="btn-hero-primary">Start Free — No Credit Card</a>
+    <a href="#pricing" class="btn-hero-ghost">See Pricing</a>
+  </div>
+</div>
+
+<!-- ── Features ─────────────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">What you get</div>
+    <div class="section-title">Everything your studio needs</div>
+    <div class="section-sub">Built specifically for embroidery, digitizing, and creative design studios.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Order Tracking</div>
+        <div class="feature-desc">Clients see every stage of their order in real-time. No more "where is my order?" emails.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📧</div>
+        <div class="feature-title">Auto File Delivery</div>
+        <div class="feature-desc">When you mark an order done, your client gets a branded email with download links automatically.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <div class="feature-title">Built-in Messaging</div>
+        <div class="feature-desc">Clients message you directly from the portal. No WhatsApp, no email threads, everything in one place.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Your Branding</div>
+        <div class="feature-desc">Add your logo, colors, and domain. Your clients never see "StudioFlow" — just your studio.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧾</div>
+        <div class="feature-title">Invoices & Plans</div>
+        <div class="feature-desc">Set subscription plans for your clients, track monthly payments, and send invoices.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Spark Mailer</div>
+        <div class="feature-desc">Built-in email marketing. Send campaigns to your clients directly from your portal dashboard.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ─────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <div class="section-label">Simple setup</div>
+    <div class="section-title">Live in minutes</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Sign Up Free</div>
+        <div class="step-desc">Create your account. Your portal is instantly live at yourstudio.digiresourcing.com</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Add Your Clients</div>
+        <div class="step-desc">Create client accounts and share login credentials. Up to 5 clients free, unlimited on paid plans.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Start Managing</div>
+        <div class="step-desc">Track orders, deliver files, message clients. Everything from one dashboard.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Upgrade Anytime</div>
+        <div class="step-desc">Add your domain, branding, and SMTP auto-delivery as you grow.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ───────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <div class="section-title">Start free, scale as you grow</div>
+    <div class="section-sub" id="ebBanner">
+      🔥 Early Bird: lock in $29/month forever — going to $59 soon. <strong id="slotsLeft">38 spots remaining.</strong>
+    </div>
+
+    <div class="pricing-grid" id="pricingGrid">
+      <!-- Plans rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ── Signup ────────────────────────────────────────────────── -->
+<section id="signup">
+  <div class="container">
+    <div style="text-align:center">
+      <div class="section-label">Get Started</div>
+      <div class="section-title">Create your portal</div>
+    </div>
+
+    <div id="signupForm" class="signup-box">
+      <h2>Start for free</h2>
+      <p>No credit card required. Upgrade anytime.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Studio Name</label>
+          <input id="studioName" placeholder="Apex Designs" />
+        </div>
+        <div class="form-group">
+          <label>Subdomain</label>
+          <input id="subdomain" placeholder="apex-designs" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input id="ownerName" placeholder="John Smith" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ownerEmail" placeholder="john@apexdesigns.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="ownerPassword" placeholder="Min 8 characters" />
+      </div>
+      <div class="form-group">
+        <label>Plan</label>
+        <select id="planSelect">
+          <option value="free">Free — 5 clients, basic features</option>
+          <option value="starter">Starter — $29/mo Early Bird 🔥 (25 clients, SMTP delivery, custom branding)</option>
+          <option value="pro">Pro — $59/mo Early Bird 🔥 (Unlimited everything + CRM + Spark Mailer)</option>
+        </select>
+      </div>
+
+      <div id="signupError" style="color:#ef4444;font-size:13px;margin-top:4px;display:none;"></div>
+
+      <button class="btn-signup" id="signupBtn" onclick="handleSignup()">
+        Create My Portal →
+      </button>
+      <div class="signup-note">Free plan — no credit card needed. Paid plans redirect to secure checkout.</div>
+    </div>
+
+    <div id="signupSuccess" class="success-box" style="display:none">
+      <div class="success-icon">🎉</div>
+      <h3>Your portal is live!</h3>
+      <p>Share these credentials with your team — you can change the password from your admin panel.</p>
+      <div class="success-cred" id="credBox"></div>
+      <a id="adminLink" href="#" target="_blank" class="btn-hero-primary" style="display:inline-block;margin-top:8px;text-decoration:none;padding:14px 32px;border-radius:10px;">
+        Open My Admin Panel →
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>StudioFlow — Powered by <a href="https://digiresourcing.com">Digiresourcing</a></p>
+  <p style="margin-top:8px">
+    <a href="mailto:support@digiresourcing.com">support@digiresourcing.com</a>
+  </p>
+</footer>
+
+<script>
+const API = 'https://studioflow-backend.onrender.com';
+
+// ── Auto-generate subdomain ───────────────────────────────────
+document.getElementById('studioName').addEventListener('input', function() {
+  const slug = this.value.toLowerCase()
+    .replace(/[^a-z0-9]/g, '-').replace(/--+/g, '-')
+    .replace(/^-|-$/g, '').slice(0, 30);
+  document.getElementById('subdomain').value = slug;
+});
+
+// ── Load plans & early bird status ───────────────────────────
+async function loadPlans() {
+  try {
+    const res  = await fetch(`${API}/api/billing/plans`);
+    const plans = await res.json();
+    renderPricing(plans);
+
+    const starter = plans.find(p => p.id === 'starter');
+    if (starter && starter.is_early_bird_available) {
+      const left = starter.early_bird_slots_remaining;
+      document.getElementById('slotsLeft').textContent = `${left} spots remaining.`;
+      const pct = ((starter.early_bird_slots_total - left) / starter.early_bird_slots_total) * 100;
+      document.querySelectorAll('.slots-fill').forEach(el => el.style.width = pct + '%');
+    }
+  } catch(e) {
+    renderStaticPricing();
+  }
+}
+
+function renderPricing(plans) {
+  const grid = document.getElementById('pricingGrid');
+  const defs = [
+    { id:'free', features:[
+      [true,'Up to 5 clients'],
+      [true,'Unlimited orders'],
+      [true,'Order tracking portal'],
+      [true,'Client messaging'],
+      [false,'Custom branding'],
+      [false,'SMTP auto-delivery'],
+      [false,'Custom domain'],
+      [false,'Spark Mailer'],
+    ]},
+    { id:'starter', featured:true, features:[
+      [true,'Up to 25 clients'],
+      [true,'Unlimited orders'],
+      [true,'Order tracking portal'],
+      [true,'Client messaging'],
+      [true,'Custom branding + logo'],
+      [true,'SMTP auto-delivery'],
+      [true,'Custom domain'],
+      [false,'CRM integration'],
+      [false,'Spark Mailer'],
+    ]},
+    { id:'pro', features:[
+      [true,'Unlimited clients'],
+      [true,'Unlimited orders'],
+      [true,'Everything in Starter'],
+      [true,'CRM integration'],
+      [true,'Spark Mailer campaigns'],
+      [true,'Multiple admins'],
+      [true,'Agent roles'],
+      [true,'Priority support'],
+    ]},
+    { id:'enterprise', features:[
+      [true,'Everything in Pro'],
+      [true,'White-label (remove branding)'],
+      [true,'API access'],
+      [true,'Unlimited emails'],
+      [true,'Dedicated onboarding'],
+    ]},
+  ];
+
+  grid.innerHTML = defs.map(def => {
+    const plan = plans.find(p => p.id === def.id);
+    if (!plan) return '';
+    const isEB = plan.is_early_bird_available;
+    const price = isEB ? plan.early_bird_price : plan.price_monthly;
+    const isPopular = def.id === 'pro';
+
+    return `
+      <div class="plan-card${def.featured||isPopular?' featured':''}">
+        ${plan.badge_text ? `<div class="plan-badge">${plan.badge_text}</div>` : ''}
+        <div class="plan-name">${plan.name}</div>
+        <div class="plan-tag">${plan.tagline || ''}</div>
+        <div class="plan-price-row">
+          <div class="plan-price">${plan.price_monthly == 0 ? 'Free' : '$' + price}</div>
+          ${plan.price_monthly > 0 ? `
+            ${isEB ? `<div class="plan-price-old">$${plan.price_monthly}</div>` : ''}
+            <div class="plan-period">/mo</div>
+          ` : ''}
+        </div>
+        ${isEB && plan.price_monthly > 0 ? `
+          <div class="plan-lock">🔒 Locked forever at $${price}/mo</div>
+          <div class="slots-bar">
+            <div class="slots-text">
+              <span style="color:var(--orange);font-weight:600">${plan.early_bird_slots_remaining} early bird spots left</span>
+              <span style="color:var(--muted)">${plan.early_bird_slots_total} total</span>
+            </div>
+            <div class="slots-track">
+              <div class="slots-fill" style="width:${Math.round(((plan.early_bird_slots_total-plan.early_bird_slots_remaining)/plan.early_bird_slots_total)*100)}%"></div>
+            </div>
+          </div>
+        ` : ''}
+        <div class="plan-divider"></div>
+        ${def.features.map(([inc, text]) => `
+          <div class="plan-feature${inc?' included':''}">
+            <span class="${inc?'check':'cross'}">${inc?'✓':'✗'}</span>
+            <span>${text}</span>
+          </div>
+        `).join('')}
+        ${plan.price_monthly == 0
+          ? `<a href="#signup" onclick="setplan('free')" class="plan-cta plan-cta-ghost">Start Free</a>`
+          : `<a href="#signup" onclick="setplan('${plan.id}')" class="plan-cta plan-cta-primary">
+               ${isEB ? '🔥 Lock Early Bird Price' : `Get ${plan.name}`}
+             </a>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStaticPricing() {
+  // Static fallback if API unreachable
+  document.getElementById('pricingGrid').innerHTML = `
+    <div class="plan-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price-row"><div class="plan-price">Free</div></div>
+      <div class="plan-divider"></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>5 clients</span></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>Unlimited orders</span></div>
+      <a href="#signup" class="plan-cta plan-cta-ghost">Start Free</a>
+    </div>
+    <div class="plan-card featured">
+      <div class="plan-badge">🔥 Early Bird</div>
+      <div class="plan-name">Starter</div>
+      <div class="plan-price-row">
+        <div class="plan-price">$29</div>
+        <div class="plan-price-old">$59</div>
+        <div class="plan-period">/mo</div>
+      </div>
+      <div class="plan-lock">🔒 Locked forever</div>
+      <div class="plan-divider"></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>25 clients</span></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>SMTP auto-delivery</span></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>Custom branding</span></div>
+      <a href="#signup" onclick="setplan('starter')" class="plan-cta plan-cta-primary">🔥 Lock Early Bird</a>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price-row">
+        <div class="plan-price">$59</div>
+        <div class="plan-price-old">$99</div>
+        <div class="plan-period">/mo</div>
+      </div>
+      <div class="plan-lock">🔒 Locked forever</div>
+      <div class="plan-divider"></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>Unlimited everything</span></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>CRM integration</span></div>
+      <div class="plan-feature included"><span class="check">✓</span><span>Spark Mailer</span></div>
+      <a href="#signup" onclick="setplan('pro')" class="plan-cta plan-cta-primary">🔥 Lock Early Bird</a>
+    </div>
+  `;
+}
+
+function setplan(planId) {
+  document.getElementById('planSelect').value = planId;
+  document.getElementById('signup').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Handle signup ─────────────────────────────────────────────
+async function handleSignup() {
+  const btn = document.getElementById('signupBtn');
+  const err = document.getElementById('signupError');
+  err.style.display = 'none';
+
+  const payload = {
+    studioName:    document.getElementById('studioName').value.trim(),
+    subdomain:     document.getElementById('subdomain').value.trim(),
+    ownerName:     document.getElementById('ownerName').value.trim(),
+    ownerEmail:    document.getElementById('ownerEmail').value.trim(),
+    ownerPassword: document.getElementById('ownerPassword').value,
+    planId:        document.getElementById('planSelect').value,
+    paymentMethod: 'free',
+  };
+
+  if (!payload.studioName || !payload.subdomain || !payload.ownerName || !payload.ownerEmail || !payload.ownerPassword) {
+    err.textContent = 'Please fill in all fields.';
+    err.style.display = 'block'; return;
+  }
+  if (payload.ownerPassword.length < 8) {
+    err.textContent = 'Password must be at least 8 characters.';
+    err.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Creating your portal…';
+
+  try {
+    // For paid plans — create free tenant then redirect to Stripe
+    const createPayload = {...payload, planId: 'free'};
+    const res = await fetch(`${API}/api/spark/tenants`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Tenant-Slug': 'spark' },
+      body: JSON.stringify(createPayload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Signup failed');
+
+    if (payload.planId !== 'free') {
+      // Redirect to billing
+      const billingRes = await fetch(`${API}/api/billing/create-checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: payload.planId, tenantId: data.id,
+          successUrl: `${data.portalUrl}/admin?billing=success`,
+          cancelUrl: window.location.href }),
+      });
+      const billingData = await billingRes.json();
+      if (billingData.url) { window.location.href = billingData.url; return; }
+    }
+
+    // Show success
+    document.getElementById('signupForm').style.display = 'none';
+    const success = document.getElementById('signupSuccess');
+    success.style.display = 'block';
+    document.getElementById('credBox').innerHTML = `
+      <div class="cred-row"><span class="cred-label">Portal URL</span><span class="cred-val">${data.portalUrl}</span></div>
+      <div class="cred-row"><span class="cred-label">Admin URL</span><span class="cred-val">${data.adminUrl}</span></div>
+      <div class="cred-row"><span class="cred-label">Email</span><span class="cred-val">${data.credentials.email}</span></div>
+      <div class="cred-row"><span class="cred-label">Password</span><span class="cred-val">${data.credentials.password}</span></div>
+    `;
+    document.getElementById('adminLink').href = data.adminUrl;
+
+  } catch(e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Create My Portal →';
+  }
+}
+
+// ── Smooth scroll ─────────────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
+  });
+});
+
+loadPlans();
+</script>
+</body>
+</html>
