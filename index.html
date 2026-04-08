@@ -58,10 +58,9 @@ nav {
   text-decoration: none; color: var(--text);
 }
 .nav-logo-icon {
-  width: 34px; height: 34px; border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  width: 34px; height: 34px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
+  flex-shrink: 0;
 }
 .nav-links { display: flex; align-items: center; gap: 8px; }
 .nav-link {
@@ -311,12 +310,93 @@ footer {
 footer a { color: var(--muted); text-decoration: none; }
 footer a:hover { color: var(--text); }
 
+/* ── Hamburger menu ───────────────────────────────────────────── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  background: none; border: none; cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background .15s;
+}
+.nav-hamburger:hover { background: rgba(255,255,255,.06); }
+.nav-hamburger span {
+  display: block; height: 2px; width: 100%;
+  background: var(--text); border-radius: 2px;
+  transition: transform .25s, opacity .25s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Tablet (max 900px) ───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .pricing-grid  { grid-template-columns: repeat(2, 1fr); }
+  .steps         { gap: 28px; }
+}
+
+/* ── Mobile (max 640px) ───────────────────────────────────────── */
 @media (max-width: 640px) {
-  nav { padding: 14px 20px; }
-  .hero { padding: 60px 20px 60px; }
-  section { padding: 60px 20px; }
+  /* Nav */
+  nav { padding: 14px 20px; position: relative; flex-wrap: wrap; }
+  .nav-hamburger { display: flex; }
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    padding: 12px 0 4px;
+    gap: 4px;
+    order: 3;
+  }
+  .nav-links.open { display: flex; }
+  .nav-link {
+    padding: 10px 12px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+  .nav-link:hover { background: rgba(255,255,255,.05); }
+  .nav-cta {
+    text-align: center;
+    padding: 11px 12px;
+    font-size: 15px;
+    margin-top: 4px;
+    border-radius: 8px;
+  }
+
+  /* Hero */
+  .hero { padding: 56px 20px 48px; }
+  .hero h1 { letter-spacing: -.8px; }
+  .hero-ctas { flex-direction: column; align-items: stretch; }
+  .btn-hero-primary,
+  .btn-hero-ghost { text-align: center; padding: 14px 24px; }
+
+  /* Sections */
+  section { padding: 52px 20px; }
+  .section-title { font-size: 26px; }
+
+  /* Features */
+  .features-grid { grid-template-columns: 1fr; gap: 14px; margin-top: 36px; }
+
+  /* How it works */
+  .steps { flex-direction: column; gap: 28px; margin-top: 36px; }
+
+  /* Pricing */
+  .pricing-grid { grid-template-columns: 1fr; gap: 20px; margin-top: 36px; }
+  .plan-card { padding: 24px 20px; }
+  .plan-price { font-size: 34px; }
+
+  /* Signup */
+  .signup-box { padding: 28px 18px; margin-top: 36px; }
   .form-row { grid-template-columns: 1fr; }
-  .signup-box { padding: 28px 20px; }
+
+  /* Footer */
+  footer { padding: 28px 20px; }
+  footer > * { display: block; margin-bottom: 6px; }
 }
 </style>
 </head>
@@ -324,13 +404,30 @@ footer a:hover { color: var(--text); }
 
 <nav>
   <a href="#" class="nav-logo">
-    <div class="nav-logo-icon">⬡</div>
+    <div class="nav-logo-icon">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="34" height="34" rx="8" fill="url(#sf-grad)"/>
+        <!-- S curve -->
+        <path d="M10 13.5 C10 11.5 11.8 10 14 10 L19 10 C20.7 10 22 11.3 22 13 C22 14.7 20.7 16 19 16 L15 16 C13.3 16 12 17.3 12 19 C12 20.7 13.3 22 15 22 L20 22 C22.2 22 24 20.5 24 18.5" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <!-- flow dot -->
+        <circle cx="24" cy="24" r="2" fill="white" opacity="0.9"/>
+        <defs>
+          <linearGradient id="sf-grad" x1="0" y1="0" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4f7cff"/>
+            <stop offset="100%" stop-color="#7c5cfc"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
     StudioFlow
   </a>
-  <div class="nav-links">
-    <a href="#features" class="nav-link">Features</a>
-    <a href="#pricing" class="nav-link">Pricing</a>
-    <a href="#signup" class="nav-cta">Start Free →</a>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links" id="navLinks">
+    <a href="#features" class="nav-link" onclick="closeNav()">Features</a>
+    <a href="#pricing" class="nav-link" onclick="closeNav()">Pricing</a>
+    <a href="#signup" class="nav-cta" onclick="closeNav()">Start Free →</a>
   </div>
 </nav>
 
@@ -504,11 +601,11 @@ footer a:hover { color: var(--text); }
 <footer>
   <p>StudioFlow — Powered by <a href="https://digiresourcing.com">Digiresourcing</a></p>
   <p style="margin-top:8px">
-    <a href="mailto:support@digiresourcing.com">support@digiresourcing.com</a>
+    <a href="/cdn-cgi/l/email-protection#14676164647b666054707d737d6671677b6166777d7a733a777b79"><span class="__cf_email__" data-cfemail="daa9afaaaab5a8ae9abeb3bdb3a8bfa9b5afa8b9b3b4bdf4b9b5b7">[email&#160;protected]</span></a>
   </p>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const API = 'https://studioflow-backend.onrender.com';
 
 // ── Auto-generate subdomain ───────────────────────────────────
@@ -749,14 +846,22 @@ async function handleSignup() {
 }
 
 // ── Smooth scroll ─────────────────────────────────────────────
-document.querySelectorAll('a[href^="#"]').forEach(a => {
+document.querySelectorAll('a[href^="#"'].forEach(a => {
   a.addEventListener('click', e => {
     const target = document.querySelector(a.getAttribute('href'));
     if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
   });
 });
 
-loadPlans();
+// ── Hamburger toggle ──────────────────────────────────────────
+function closeNav() {
+  document.getElementById('navHamburger').classList.remove('open');
+  document.getElementById('navLinks').classList.remove('open');
+}
+document.getElementById('navHamburger').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
 </script>
 </body>
 </html>
