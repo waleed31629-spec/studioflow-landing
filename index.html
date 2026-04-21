@@ -274,10 +274,21 @@ section { position: relative; z-index: 1; padding: 90px 40px; }
 }
 .form-group input, .form-group select {
   width: 100%; padding: 13px 16px;
-  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px; color: var(--text);
+  background: #0d1526; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px; color: #e8edf8;
   font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
   transition: border .15s, background .15s;
+  -webkit-appearance: none; appearance: none;
+}
+.form-group select {
+  background-color: #0d1526;
+  color: #e8edf8;
+}
+.form-group select option {
+  background-color: #0d1526;
+  color: #e8edf8;
+  font-size: 14px;
+  padding: 10px 16px;
 }
 .form-group input:focus, .form-group select:focus {
   border-color: rgba(79,124,255,.5);
@@ -594,11 +605,14 @@ footer a:hover { color: var(--text); }
       </div>
       <div class="form-group">
         <label>Plan</label>
-        <select id="planSelect">
-          <option value="free">Free — 5 clients, basic features</option>
-          <option value="starter">Starter — $29/mo Early Bird 🔥 (25 clients, SMTP delivery, custom branding)</option>
-          <option value="pro">Pro — $59/mo Early Bird 🔥 (Unlimited everything + CRM + Spark Mailer)</option>
-        </select>
+        <div style="position:relative;">
+          <select id="planSelect" style="padding-right:40px;">
+            <option value="free">Free — 5 clients, basic features</option>
+            <option value="starter">Starter — $29/mo Early Bird 🔥 (25 clients, SMTP, custom branding)</option>
+            <option value="pro">Pro — $59/mo Early Bird 🔥 (Unlimited + CRM + Spark Mailer)</option>
+          </select>
+          <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:rgba(255,255,255,.4);font-size:12px;">▼</div>
+        </div>
       </div>
 
       <div id="signupError" style="color:#ef4444;font-size:13px;margin-top:4px;display:none;"></div>
@@ -630,7 +644,7 @@ footer a:hover { color: var(--text); }
 
 <script>
 const API = 'https://studioflow-backend.onrender.com';
-const SIGNUP_KEY = 'sf_public_2026';
+const SIGNUP_KEY = 'sf_public_2024';
 
 // ── Auto-generate subdomain from studio name ─────────────────
 document.getElementById('studioName').addEventListener('input', function() {
@@ -859,16 +873,21 @@ async function handleSignup() {
     if (!res.ok) throw new Error(data.error || 'Signup failed');
 
     if (payload.planId !== 'free') {
-      // Redirect to billing
-      const billingRes = await fetch(`${API}/api/billing/create-checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: payload.planId, tenantId: data.id,
-          successUrl: `${data.portalUrl}/admin?billing=success`,
-          cancelUrl: window.location.href }),
-      });
-      const billingData = await billingRes.json();
-      if (billingData.url) { window.location.href = billingData.url; return; }
+      // Billing not yet active — portal created on free plan, admin will upgrade manually
+      document.getElementById('signupForm').style.display = 'none';
+      const success = document.getElementById('signupSuccess');
+      success.style.display = 'block';
+      document.getElementById('credBox').innerHTML = `
+        <div class="cred-row"><span class="cred-label">Portal URL</span><span class="cred-val">${data.portalUrl}</span></div>
+        <div class="cred-row"><span class="cred-label">Admin URL</span><span class="cred-val">${data.adminUrl}</span></div>
+        <div class="cred-row"><span class="cred-label">Email</span><span class="cred-val">${data.credentials.email}</span></div>
+        <div class="cred-row"><span class="cred-label">Password</span><span class="cred-val">${data.credentials.password}</span></div>
+        <div style="margin-top:12px;padding:10px 12px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:8px;font-size:12px;color:#f97316;">
+          🔥 You selected the ${payload.planId === 'pro' ? 'Pro' : 'Starter'} Early Bird plan. Your portal is active — our team will contact you at ${payload.ownerEmail} within 24 hours to complete your upgrade and lock your rate.
+        </div>
+      `;
+      document.getElementById('adminLink').href = data.adminUrl;
+      return;
     }
 
     // Show success
