@@ -594,18 +594,11 @@ footer a:hover { color: var(--text); }
       </div>
       <div class="form-group">
         <label>Plan</label>
-        <select id="planSelect" onchange="toggleCustomDomain()">
+        <select id="planSelect">
           <option value="free">Free — 5 clients, basic features</option>
           <option value="starter">Starter — $29/mo Early Bird 🔥 (25 clients, SMTP delivery, custom branding)</option>
           <option value="pro">Pro — $59/mo Early Bird 🔥 (Unlimited everything + CRM + Spark Mailer)</option>
         </select>
-      </div>
-      <div class="form-group" id="customDomainGroup" style="display:none;">
-        <label>Custom Domain <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:400;">(optional — paid plans only)</span></label>
-        <input id="customDomain" placeholder="portal.yourstudio.com" />
-        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:5px;">
-          Your clients will access the portal at portal.yourstudio.com — /admin and /designer routes included. Point your domain's CNAME to digiresourcing.com to activate.
-        </div>
       </div>
 
       <div id="signupError" style="color:#ef4444;font-size:13px;margin-top:4px;display:none;"></div>
@@ -637,7 +630,7 @@ footer a:hover { color: var(--text); }
 
 <script>
 const API = 'https://studioflow-backend.onrender.com';
-const SPARK_SECRET = 'spark_super_2024';
+const SIGNUP_KEY = 'sf_public_2024';
 
 // ── Auto-generate subdomain from studio name ─────────────────
 document.getElementById('studioName').addEventListener('input', function() {
@@ -663,12 +656,7 @@ function togglePassword() {
   }
 }
 
-// ── Show/hide custom domain based on plan ────────────────────
-function toggleCustomDomain() {
-  const plan = document.getElementById('planSelect').value;
-  const group = document.getElementById('customDomainGroup');
-  group.style.display = (plan === 'starter' || plan === 'pro') ? 'block' : 'none';
-}
+
 
 // ── Load plans & early bird status ───────────────────────────
 async function loadPlans() {
@@ -842,7 +830,6 @@ async function handleSignup() {
     ownerEmail:    document.getElementById('ownerEmail').value.trim(),
     ownerPassword: document.getElementById('ownerPassword').value,
     planId:        document.getElementById('planSelect').value,
-    customDomain:  document.getElementById('customDomain')?.value.trim() || '',
     paymentMethod: 'free',
   };
 
@@ -860,13 +847,11 @@ async function handleSignup() {
   try {
     // For paid plans — create free tenant then redirect to Stripe
     const createPayload = {...payload, planId: 'free'};
-    const res = await fetch(`${API}/api/spark/tenants`, {
+    const res = await fetch(`${API}/api/spark/public/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Tenant-Slug': 'spark',
-        'Authorization': `Bearer ${SPARK_SECRET}`,
-        'X-Spark-Secret': SPARK_SECRET,
+        'X-Signup-Key': SIGNUP_KEY,
       },
       body: JSON.stringify(createPayload),
     });
