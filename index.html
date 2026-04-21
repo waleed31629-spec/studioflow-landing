@@ -637,6 +637,7 @@ footer a:hover { color: var(--text); }
 
 <script>
 const API = 'https://studioflow-backend.onrender.com';
+const SPARK_SECRET = 'spark_super_2024';
 
 // ── Auto-generate subdomain from studio name ─────────────────
 document.getElementById('studioName').addEventListener('input', function() {
@@ -861,7 +862,12 @@ async function handleSignup() {
     const createPayload = {...payload, planId: 'free'};
     const res = await fetch(`${API}/api/spark/tenants`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Tenant-Slug': 'spark' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Tenant-Slug': 'spark',
+        'Authorization': `Bearer ${SPARK_SECRET}`,
+        'X-Spark-Secret': SPARK_SECRET,
+      },
       body: JSON.stringify(createPayload),
     });
     const data = await res.json();
@@ -902,7 +908,9 @@ async function handleSignup() {
 // ── Smooth scroll ─────────────────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
+    const target = document.querySelector(href);
     if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
   });
 });
