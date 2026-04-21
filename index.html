@@ -311,12 +311,12 @@ section { position: relative; z-index: 1; padding: 90px 40px; }
 
 /* Success */
 .success-box {
-  background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
-  border-radius: 14px; padding: 32px; text-align: center; max-width: 560px; margin: 52px auto 0;
+  background: rgba(79,124,255,.06); border: 1px solid rgba(79,124,255,.2);
+  border-radius: 20px; padding: 40px 36px; text-align: center; max-width: 580px; margin: 56px auto 0;
 }
 .success-icon { font-size: 48px; margin-bottom: 16px; }
-.success-box h3 { font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--green); }
-.success-box p  { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.success-box h3 { font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; color: var(--accent); letter-spacing: -.5px; }
+.success-box p  { color: var(--muted); font-size: 14px; line-height: 1.8; max-width: 420px; margin: 0 auto 20px; }
 .success-cred   { background: var(--bg2); border-radius: 10px; padding: 20px; margin: 20px 0; text-align: left; }
 .cred-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
 .cred-row:last-child { border-bottom: none; }
@@ -624,13 +624,10 @@ footer a:hover { color: var(--text); }
     </div>
 
     <div id="signupSuccess" class="success-box" style="display:none">
-      <div class="success-icon">🎉</div>
-      <h3>Your portal is live!</h3>
-      <p>Share these credentials with your team — you can change the password from your admin panel.</p>
+      <div class="success-icon">📋</div>
+      <h3 id="successTitle">Request submitted!</h3>
+      <p id="successMsg">We've received your portal request and will review it shortly.</p>
       <div class="success-cred" id="credBox"></div>
-      <a id="adminLink" href="#" target="_blank" class="btn-hero-primary" style="display:inline-block;margin-top:8px;text-decoration:none;padding:14px 32px;border-radius:10px;">
-        Open My Admin Panel →
-      </a>
     </div>
   </div>
 </section>
@@ -644,7 +641,7 @@ footer a:hover { color: var(--text); }
 
 <script>
 const API = 'https://studioflow-backend.onrender.com';
-const SIGNUP_KEY = 'sf_public_2026';
+const SIGNUP_KEY = 'sf_public_2024';
 
 // ── Auto-generate subdomain from studio name ─────────────────
 document.getElementById('studioName').addEventListener('input', function() {
@@ -856,51 +853,40 @@ async function handleSignup() {
     err.style.display = 'block'; return;
   }
 
-  btn.disabled = true; btn.textContent = 'Creating your portal…';
+  btn.disabled = true; btn.textContent = 'Submitting request…';
 
   try {
-    // For paid plans — create free tenant then redirect to Stripe
-    const createPayload = {...payload, planId: 'free'};
     const res = await fetch(`${API}/api/spark/public/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Signup-Key': SIGNUP_KEY,
       },
-      body: JSON.stringify(createPayload),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Signup failed');
 
-    if (payload.planId !== 'free') {
-      // Billing not yet active — portal created on free plan, admin will upgrade manually
-      document.getElementById('signupForm').style.display = 'none';
-      const success = document.getElementById('signupSuccess');
-      success.style.display = 'block';
-      document.getElementById('credBox').innerHTML = `
-        <div class="cred-row"><span class="cred-label">Portal URL</span><span class="cred-val">${data.portalUrl}</span></div>
-        <div class="cred-row"><span class="cred-label">Admin URL</span><span class="cred-val">${data.adminUrl}</span></div>
-        <div class="cred-row"><span class="cred-label">Email</span><span class="cred-val">${data.credentials.email}</span></div>
-        <div class="cred-row"><span class="cred-label">Password</span><span class="cred-val">${data.credentials.password}</span></div>
-        <div style="margin-top:12px;padding:10px 12px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:8px;font-size:12px;color:#f97316;">
-          🔥 You selected the ${payload.planId === 'pro' ? 'Pro' : 'Starter'} Early Bird plan. Your portal is active — our team will contact you at ${payload.ownerEmail} within 24 hours to complete your upgrade and lock your rate.
-        </div>
-      `;
-      document.getElementById('adminLink').href = data.adminUrl;
-      return;
-    }
-
-    // Show success
+    // Show pending request confirmation
     document.getElementById('signupForm').style.display = 'none';
     const success = document.getElementById('signupSuccess');
     success.style.display = 'block';
+
+    const isPaid = payload.planId !== 'free';
+    document.getElementById('successTitle').textContent = isPaid ? 'Request received!' : 'Request submitted!';
+    document.getElementById('successMsg').textContent = isPaid
+      ? `Your ${payload.planId === 'pro' ? 'Pro' : 'Starter'} plan request is under review. We'll contact you at ${payload.ownerEmail} within 24 hours to confirm payment and activate your portal.`
+      : `We've received your free plan request. Our team will review and activate your portal shortly. You'll receive your login details at ${payload.ownerEmail}.`;
+
     document.getElementById('credBox').innerHTML = `
-      <div class="cred-row"><span class="cred-label">Portal URL</span><span class="cred-val">${data.portalUrl}</span></div>
-      <div class="cred-row"><span class="cred-label">Admin URL</span><span class="cred-val">${data.adminUrl}</span></div>
-      <div class="cred-row"><span class="cred-label">Email</span><span class="cred-val">${data.credentials.email}</span></div>
-      <div class="cred-row"><span class="cred-label">Password</span><span class="cred-val">${data.credentials.password}</span></div>
+      <div class="cred-row"><span class="cred-label">Studio Name</span><span class="cred-val">${payload.studioName}</span></div>
+      <div class="cred-row"><span class="cred-label">Portal URL</span><span class="cred-val">https://${payload.subdomain}.digiresourcing.com</span></div>
+      <div class="cred-row"><span class="cred-label">Plan</span><span class="cred-val">${payload.planId === 'free' ? 'Free' : payload.planId === 'pro' ? 'Pro Early Bird' : 'Starter Early Bird'}</span></div>
+      <div class="cred-row"><span class="cred-label">Contact Email</span><span class="cred-val">${payload.ownerEmail}</span></div>
+      <div style="margin-top:14px;padding:12px 14px;background:rgba(79,124,255,.08);border:1px solid rgba(79,124,255,.2);border-radius:10px;font-size:12px;color:rgba(180,200,255,.9);line-height:1.7;">
+        ⏳ Your request is pending admin review. Once approved, you'll be able to log in at the portal URL above with the credentials you set.
+      </div>
     `;
-    document.getElementById('adminLink').href = data.adminUrl;
 
   } catch(e) {
     err.textContent = e.message;
